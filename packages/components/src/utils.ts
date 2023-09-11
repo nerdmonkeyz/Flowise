@@ -432,6 +432,10 @@ export const getCredentialData = async (selectedCredentialId: string, options: I
     const databaseEntities = options.databaseEntities as IDatabaseEntity
 
     try {
+        if (!selectedCredentialId) {
+            return {}
+        }
+
         const credential = await appDataSource.getRepository(databaseEntities['Credential']).findOneBy({
             id: selectedCredentialId
         })
@@ -519,4 +523,23 @@ export const mapChatHistory = (options: ICommonObject): ChatMessageHistory => {
         }
     }
     return new ChatMessageHistory(chatHistory)
+}
+
+/**
+ * Convert incoming chat history to string
+ * @param {IMessage[]} chatHistory
+ * @returns {string}
+ */
+export const convertChatHistoryToText = (chatHistory: IMessage[]): string => {
+    return chatHistory
+        .map((chatMessage) => {
+            if (chatMessage.type === 'apiMessage') {
+                return `Assistant: ${chatMessage.message}`
+            } else if (chatMessage.type === 'userMessage') {
+                return `Human: ${chatMessage.message}`
+            } else {
+                return `${chatMessage.message}`
+            }
+        })
+        .join('\n')
 }
